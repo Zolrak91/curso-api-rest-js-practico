@@ -30,7 +30,7 @@ function navigator() {
 }
 
 function trendsPage() {
-    console.log('TRENDS');
+    window.scrollTo(0,0)
 
     headerSection.classList.remove('header-container--long');
     headerSection.style.background = '';
@@ -47,7 +47,7 @@ function trendsPage() {
 }
 
 function searchPage() {
-    console.log('SEARCH');
+    window.scrollTo(0,0)
 
     headerSection.classList.remove('header-container--long');
     headerSection.style.background = '';
@@ -64,7 +64,7 @@ function searchPage() {
 }
 
 function moviePage() {
-    console.log('MOVIE');
+    window.scrollTo(0,0)
 
     headerSection.classList.add('header-container--long');
     headerSection.style.background = '';
@@ -81,7 +81,7 @@ function moviePage() {
 }
 
 function genrePage() {
-    console.log('GENRES');
+    window.scrollTo(0,0)
 
     headerSection.classList.remove('header-container--long');
     headerSection.style.background = '';
@@ -93,12 +93,18 @@ function genrePage() {
 
     trendingPreviewSection.classList.add('inactive');
     categoriesPreviewSection.classList.add('inactive');
-    genericSection.classList.remove('inactive')
-    movieDetailSection.classList.add('inactive')
+    genericSection.classList.remove('inactive');
+    movieDetailSection.classList.add('inactive');
+
+    const [_, genreData] = location.hash.split('='); // ['#category', 'id-name'] 
+    const [genreId, genreName] = genreData.split('-'); 
+
+    headerCategoryTitle.innerHTML = decodeURI(genreName); // decodeURI reemplaza el "%20" por un " ". e.g: Science%20Fiction => Science Fiction
+    getMovieByGenre(genreId);
 }
 
 function homePage() {
-    console.log('HOME');
+    window.scrollTo(0,0)
 
     headerSection.classList.remove('header-container--long');
     headerSection.style.background = '';
