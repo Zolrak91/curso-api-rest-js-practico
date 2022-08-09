@@ -8,7 +8,10 @@ const api = axios.create({
     },
 });
 
+// Utils
 function createMovieContainer(section, movies) {
+    section.innerHTML = "";
+
     movies.forEach(movie => {
         const movieContainer = document.createElement('div');
         movieContainer.classList.add('movie-container');
@@ -23,14 +26,12 @@ function createMovieContainer(section, movies) {
     });
 }
 
+// API calls
 async function getTrendingMoviesPreview() {
     const {data} = await api('/trending/movie/day');
     const movies = data.results;
 
-    const section = trendingMoviesPreviewList;
-    section.innerHTML = '';
-
-    createMovieContainer(section, movies);
+    createMovieContainer(trendingMoviesPreviewList, movies);
 }
 
 async function getGenresPreview() {
@@ -64,8 +65,23 @@ async function getMovieByGenre(id) {
     });
     const movies = data.results;
 
-    const section = genericSection;
-    section.innerHTML = "";
+    createMovieContainer(genericSection, movies);
+}
 
-    createMovieContainer(section, movies);
+async function getMovieBySearch(query) {
+    const {data} = await api('/search/movie', {
+        params: {
+            query: query, // Al tener el mismo nombre puede ponerse simplemente: ' query, '
+        }
+    });
+    const movies = data.results;
+
+    createMovieContainer(genericSection, movies);
+}
+
+async function getTrendingMovies() {
+    const {data} = await api('/trending/movie/day');
+    const movies = data.results;
+
+    createMovieContainer(genericSection, movies);
 }
