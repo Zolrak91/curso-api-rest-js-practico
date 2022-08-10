@@ -16,6 +16,10 @@ function createMovieContainer(section, movies) {
         const movieContainer = document.createElement('div');
         movieContainer.classList.add('movie-container');
 
+        movieContainer.addEventListener('click', () => {
+            location.hash = `movie=${movie.id}`;
+        });
+
         const movieImg = document.createElement('img');
         movieImg.classList.add('movie-img');
         movieImg.setAttribute('alt', movie.title);
@@ -23,6 +27,25 @@ function createMovieContainer(section, movies) {
 
         movieContainer.appendChild(movieImg);
         section.appendChild(movieContainer); // 'trendingMoviesPreviewList' tomado de nodes.js
+    });
+}
+
+function createGenresContainer(section, genres) {
+    section.innerHTML = '';
+
+    genres.forEach(genre => {
+        const genreContainer = document.createElement('div');
+        genreContainer.classList.add('category-container');
+
+        const genreName = document.createElement('h3');
+        genreName.classList.add('category-title');
+        genreName.setAttribute('id', ('id' + genre.id));
+        genreName.addEventListener('click', () => {
+            location.hash = `#genre=${genre.id}-${genre.name}`;
+        });
+        genreName.innerHTML = genre.name; // Esto lo hice diferente
+        genreContainer.appendChild(genreName);
+        section.appendChild(genreContainer);
     });
 }
 
@@ -38,23 +61,7 @@ async function getGenresPreview() {
     const {data} = await api('/genre/movie/list');
     const genres = data.genres;
 
-    categoriesPreviewList.innerHTML = '';
-
-    genres.forEach(genre => {
-        const genreContainer = document.createElement('div');
-        genreContainer.classList.add('category-container');
-
-        const genreName = document.createElement('h3');
-        genreName.classList.add('category-title');
-        genreName.setAttribute('id', ('id' + genre.id));
-        genreName.addEventListener('click', () => {
-            location.hash = `#genre=${genre.id}-${genre.name}`;
-        });
-        genreName.innerHTML = genre.name; // Esto lo hice diferente
-
-        genreContainer.appendChild(genreName);
-        categoriesPreviewList.appendChild(genreContainer);
-    });
+    createGenresContainer(categoriesPreviewList, genres);
 }
 
 async function getMovieByGenre(id) {
@@ -84,4 +91,24 @@ async function getTrendingMovies() {
     const movies = data.results;
 
     createMovieContainer(genericSection, movies);
+}
+
+async function getMovieById(id) {
+    const {data : movie} = await api('movie/'+ id); //Crea la variable data y le cambia el nombre a movie (lo dejé como curiosidad)
+
+    const movieImgURL = 'https://image.tmdb.org/t/p/w500' + movie.poster_path;
+    headerSection.style.background =  `
+    linear-gradient(
+        180deg, 
+        rgba(0, 0, 0, 0.35) 19.27%, 
+        rgba(0, 0, 0, 0) 29.17%
+        ),
+    url(${movieImgURL})
+    `;
+
+    movieDetailTitle.textContent = movie.title;
+    movieDetailDescription.textContent = movie.overview;
+    movieDetailScore.textContent = movie.vote_average;
+
+    createGenresContainer(movieDetailCategoriesList, movie.genres);
 }
