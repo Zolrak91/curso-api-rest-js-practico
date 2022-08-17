@@ -9,7 +9,16 @@ const api = axios.create({
 });
 
 // Utils
-function createMovieContainer(section, movies) {
+const lazyLoaderObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        if (entry.isIntersecting){
+            const url = entry.target.getAttribute('data-src');
+            entry.target.setAttribute('src', url);
+        }
+    });
+});
+
+function createMovieContainer(section, movies, lazyLoad = false) {
     section.innerHTML = "";
 
     movies.forEach(movie => {
@@ -23,8 +32,15 @@ function createMovieContainer(section, movies) {
         const movieImg = document.createElement('img');
         movieImg.classList.add('movie-img');
         movieImg.setAttribute('alt', movie.title);
-        movieImg.setAttribute('src', ('https://image.tmdb.org/t/p/w300' + movie.poster_path));
+        movieImg.setAttribute(
+            lazyLoad ? 'data-src' : 'src', // si lazyLoad es true el valor del 1er param será 'data-src', sino 'src'
+            ('https://image.tmdb.org/t/p/w300' + movie.poster_path) // 2do param, es el valor del atributo(1er param)
+        );
 
+        if (lazyLoad) {
+            lazyLoaderObserver.observe(movieImg);
+        } 
+            
         movieContainer.appendChild(movieImg);
         section.appendChild(movieContainer); // 'trendingMoviesPreviewList' tomado de nodes.js
     });
@@ -54,7 +70,7 @@ async function getTrendingMoviesPreview() {
     const {data} = await api('/trending/movie/day');
     const movies = data.results;
 
-    createMovieContainer(trendingMoviesPreviewList, movies);
+    createMovieContainer(trendingMoviesPreviewList, movies, true);
 }
 
 async function getGenresPreview() {
