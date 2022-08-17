@@ -34,7 +34,7 @@ function createMovieContainer(section, movies, lazyLoad = false) {
         movieImg.setAttribute('alt', movie.title);
         movieImg.setAttribute(
             lazyLoad ? 'data-src' : 'src', // si lazyLoad es true el valor del 1er param será 'data-src', sino 'src'
-            ('https://image.tmdb.org/t/p/w300' + movie.poster_path) // 2do param, es el valor del atributo(1er param)
+            (movie.poster_path != null) ? ('https://image.tmdb.org/t/p/w300' + movie.poster_path) : 'https://www.prachiindia.com/ModuleFiles/Items/cover_Image.png' // 2do param, es el valor del atributo(1er param)
         );
 
         if (lazyLoad) {
@@ -99,7 +99,7 @@ async function getMovieBySearch(query) {
     });
     const movies = data.results;
 
-    createMovieContainer(genericSection, movies);
+    createMovieContainer(genericSection, movies, true);
 }
 
 async function getTrendingMovies() {
