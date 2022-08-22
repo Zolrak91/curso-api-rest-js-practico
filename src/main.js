@@ -1,5 +1,5 @@
 const api = axios.create({
-    baseURL: 'https://api.themoviedb.org/3',
+    baseURL: 'https://api.themoviedb.org/3/',
     headers: {
         'Content-Type': 'application/json;charset=utf-8',
     },
@@ -8,149 +8,185 @@ const api = axios.create({
     },
 });
 
+
 // Utils
-const lazyLoaderObserver = new IntersectionObserver((entries) => {
+
+const lazyLoader = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-        if (entry.isIntersecting){
-            const url = entry.target.getAttribute('data-src');
-            entry.target.setAttribute('src', url);
+        if (entry.isIntersecting) {
+        const url = entry.target.getAttribute('data-img')
+        entry.target.setAttribute('src', url);
         }
     });
 });
 
-function createMovieContainer(
-        section, 
-        movies, 
-        {lazyLoad = true, clean = true} = {}
+function createMovies(
+    movies,
+    container,
+    {
+        lazyLoad = false,
+        clean = true,
+    } = {},
     ) {
-    if (clean) {
-        section.innerHTML = "";
+if (clean) {
+    container.innerHTML = '';
+}
+
+movies.forEach(movie => {
+    const movieContainer = document.createElement('div');
+    movieContainer.classList.add('movie-container');
+    movieContainer.addEventListener('click', () => {
+        location.hash = '#movie=' + movie.id;
+    });
+
+    const movieImg = document.createElement('img');
+    movieImg.classList.add('movie-img');
+    movieImg.setAttribute('alt', movie.title);
+    movieImg.setAttribute(
+        lazyLoad ? 'data-img' : 'src',
+        'https://image.tmdb.org/t/p/w300' + movie.poster_path,
+    );
+    movieImg.addEventListener('error', () => {
+        movieImg.setAttribute(
+            'src',
+            'https://static.platzi.com/static/images/error/img404.png',
+        );
+    })
+
+    if (lazyLoad) {
+        lazyLoader.observe(movieImg);
     }
 
-    movies.forEach(movie => {
-        const movieContainer = document.createElement('div');
-        movieContainer.classList.add('movie-container');
+    movieContainer.appendChild(movieImg);
+    container.appendChild(movieContainer);
+});
+}
 
-        movieContainer.addEventListener('click', () => {
-            location.hash = `movie=${movie.id}`;
+function createCategories(categories, container) {
+    container.innerHTML = "";
+
+    categories.forEach(category => {  
+        const categoryContainer = document.createElement('div');
+        categoryContainer.classList.add('category-container');
+
+        const categoryTitle = document.createElement('h3');
+        categoryTitle.classList.add('category-title');
+        categoryTitle.setAttribute('id', 'id' + category.id);
+        categoryTitle.addEventListener('click', () => {
+            location.hash = `#category=${category.id}-${category.name}`;
         });
+        const categoryTitleText = document.createTextNode(category.name);
 
-        const movieImg = document.createElement('img');
-        movieImg.classList.add('movie-img');
-        movieImg.setAttribute('alt', movie.title);
-        movieImg.setAttribute(
-            lazyLoad ? 'data-src' : 'src', // si lazyLoad es true el valor del 1er param será 'data-src', sino 'src'
-            (movie.poster_path != null) ? ('https://image.tmdb.org/t/p/w300' + movie.poster_path) : 'https://www.prachiindia.com/ModuleFiles/Items/cover_Image.png' // 2do param, es el valor del atributo(1er param)
-        );
-
-        if (lazyLoad) {
-            lazyLoaderObserver.observe(movieImg);
-        } 
-            
-        movieContainer.appendChild(movieImg);
-        section.appendChild(movieContainer); // 'trendingMoviesPreviewList' tomado de nodes.js
+        categoryTitle.appendChild(categoryTitleText);
+        categoryContainer.appendChild(categoryTitle);
+        container.appendChild(categoryContainer);
     });
 }
 
-function createGenresContainer(section, genres) {
-    section.innerHTML = '';
+// Llamados a la API
 
-    genres.forEach(genre => {
-        const genreContainer = document.createElement('div');
-        genreContainer.classList.add('category-container');
-
-        const genreName = document.createElement('h3');
-        genreName.classList.add('category-title');
-        genreName.setAttribute('id', ('id' + genre.id));
-        genreName.addEventListener('click', () => {
-            location.hash = `#genre=${genre.id}-${genre.name}`;
-        });
-        genreName.innerHTML = genre.name; // Esto lo hice diferente
-        genreContainer.appendChild(genreName);
-        section.appendChild(genreContainer);
-    });
-}
-
-// API calls
 async function getTrendingMoviesPreview() {
-    const {data} = await api('/trending/movie/day');
+    const { data } = await api('trending/movie/day');
     const movies = data.results;
+    console.log(movies)
 
-    createMovieContainer(trendingMoviesPreviewList, movies);
+    createMovies(movies, trendingMoviesPreviewList, true);
+    }
+
+    async function getCategegoriesPreview() {
+    const { data } = await api('genre/movie/list');
+    const categories = data.genres;
+
+    createCategories(categories, categoriesPreviewList);
 }
 
-async function getGenresPreview() {
-    const {data} = await api('/genre/movie/list');
-    const genres = data.genres;
-
-    createGenresContainer(categoriesPreviewList, genres);
-}
-
-async function getMovieByGenre(id) {
-    const {data} = await api('/discover/movie', {
+async function getMoviesByCategory(id) {
+    const { data } = await api('discover/movie', {
         params: {
-            with_genres: id,
-        }
-    });
-    const movies = data.results;
-
-    createMovieContainer(genericSection, movies);
-}
-
-async function getMovieBySearch(query) {
-    const {data} = await api('/search/movie', {
-        params: {
-            query: query, // Al tener el mismo nombre puede ponerse simplemente: ' query, '
-        }
-    });
-    const movies = data.results;
-
-    createMovieContainer(genericSection, movies);
-}
-
-async function getTrendingMovies(page = 1) {
-    const {data} = await api('/trending/movie/day', {
-        params: {
-            page,
+        with_genres: id,
         },
     });
     const movies = data.results;
 
-    createMovieContainer(genericSection, movies, {lazyLoad: true, clean: page == 1}); // Limpia si page = 1
+    createMovies(movies, genericSection, true);
+}
 
-    const btnLoadMore = document.createElement('button');
-    btnLoadMore.innerHTML = "Cargar más";
-    genericSection.appendChild(btnLoadMore);
-    btnLoadMore.addEventListener('click', () => {
-        getTrendingMovies(page+1);
-        btnLoadMore.remove();
+async function getMoviesBySearch(query) {
+    const { data } = await api('search/movie', {
+        params: {
+        query,
+        },
     });
+    const movies = data.results;
+
+    createMovies(movies, genericSection);
+}
+
+async function getTrendingMovies() {
+    const { data } = await api('trending/movie/day');
+    const movies = data.results;
+
+    createMovies(movies, genericSection, { lazyLoad: true, clean: true });
+
+    // const btnLoadMore = document.createElement('button');
+    // btnLoadMore.innerText = 'Cargar más';
+    // btnLoadMore.addEventListener('click', getPaginatedTrendingMovies);
+    // genericSection.appendChild(btnLoadMore);
+}
+
+async function getPaginatedTrendingMovies() {
+    const {scrollTop, scrollHeight, clientHeight} = document.documentElement;
+
+    const scrollIsBottom = (scrollTop + clientHeight) >= (scrollHeight - 15);
+
+    if (scrollIsBottom) {
+            page++;
+            const { data } = await api('trending/movie/day', {
+            params: {
+                page,
+            },
+        });
+        const movies = data.results;
+
+        createMovies(
+        movies,
+        genericSection,
+        { lazyLoad: true, clean: false },
+        );
+    }
+
+    // const btnLoadMore = document.createElement('button');
+    // btnLoadMore.innerText = 'Cargar más';
+    // btnLoadMore.addEventListener('click', getPaginatedTrendingMovies);
+    // genericSection.appendChild(btnLoadMore);
 }
 
 async function getMovieById(id) {
-    const {data : movie} = await api('/movie/'+ id); //Crea la variable data y le cambia el nombre a movie (lo dejé como curiosidad)
+    const { data: movie } = await api('movie/' + id);
 
-    const movieImgURL = 'https://image.tmdb.org/t/p/w500' + movie.poster_path;
-    headerSection.style.background =  `
-    linear-gradient(
-        180deg, 
-        rgba(0, 0, 0, 0.35) 19.27%, 
+    const movieImgUrl = 'https://image.tmdb.org/t/p/w500' + movie.poster_path;
+    console.log(movieImgUrl)
+    headerSection.style.background = `
+        linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.35) 19.27%,
         rgba(0, 0, 0, 0) 29.17%
         ),
-    url(${movieImgURL})
+        url(${movieImgUrl})
     `;
 
     movieDetailTitle.textContent = movie.title;
     movieDetailDescription.textContent = movie.overview;
     movieDetailScore.textContent = movie.vote_average;
 
-    createGenresContainer(movieDetailCategoriesList, movie.genres);
-    getRelatedMoviesById(id);
+    createCategories(movie.genres, movieDetailCategoriesList);
+
+    getRelatedMoviesId(id);
 }
 
-async function getRelatedMoviesById(id){
-    const {data} = await api(`/movie/${id}/similar`);
+async function getRelatedMoviesId(id) {
+    const { data } = await api(`movie/${id}/recommendations`);
     const relatedMovies = data.results;
 
-    createMovieContainer(relatedMoviesContainer, relatedMovies);
+    createMovies(relatedMovies, relatedMoviesContainer);
 }
