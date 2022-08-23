@@ -1,4 +1,5 @@
 let page = 1;
+let maxPages;
 let infiniteScroll;
 
 searchFormBtn.addEventListener('click', () => {
@@ -19,8 +20,6 @@ window.addEventListener('hashchange', navigator, false);
 window.addEventListener('scroll', infiniteScroll, false);
 
 function navigator() {
-  console.log({ location });
-
   if (infiniteScroll) {
     window.removeEventListener('scroll', infiniteScroll, { passive: false });
     infiniteScroll = undefined;
@@ -47,8 +46,6 @@ function navigator() {
 }
 
 function homePage() {
-  console.log('Home!!');
-
   headerSection.classList.remove('header-container--long');
   headerSection.style.background = '';
   arrowBtn.classList.add('inactive');
@@ -67,8 +64,6 @@ function homePage() {
 }
 
 function categoriesPage() {
-  console.log('categories!!');
-
   headerSection.classList.remove('header-container--long');
   headerSection.style.background = '';
   arrowBtn.classList.remove('inactive');
@@ -89,11 +84,10 @@ function categoriesPage() {
   headerCategoryTitle.innerHTML = categoryName;
   
   getMoviesByCategory(categoryId);
+  infiniteScroll = getPaginatedMoviesByCategory(categoryId);
 }
 
 function movieDetailsPage() {
-  console.log('Movie!!');
-
   headerSection.classList.add('header-container--long');
   // headerSection.style.background = '';
   arrowBtn.classList.remove('inactive');
@@ -113,8 +107,6 @@ function movieDetailsPage() {
 }
 
 function searchPage() {
-  console.log('Search!!');
-
   headerSection.classList.remove('header-container--long');
   headerSection.style.background = '';
   arrowBtn.classList.remove('inactive');
@@ -134,8 +126,6 @@ function searchPage() {
 }
 
 function trendsPage() {
-  console.log('TRENDS!!');
-
   headerSection.classList.remove('header-container--long');
   headerSection.style.background = '';
   arrowBtn.classList.remove('inactive');
@@ -152,6 +142,5 @@ function trendsPage() {
   headerCategoryTitle.innerHTML = 'Tendencias';
 
   getTrendingMovies();
-
   infiniteScroll = getPaginatedTrendingMovies;
 }
