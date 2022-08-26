@@ -43,6 +43,7 @@ function navigator() {
   if (infiniteScroll) {
     window.addEventListener('scroll', infiniteScroll, { passive: false });
   }
+  page = 1;
 }
 
 function homePage() {
@@ -84,7 +85,7 @@ function categoriesPage() {
   headerCategoryTitle.innerHTML = categoryName;
   
   getMoviesByCategory(categoryId);
-  infiniteScroll = getPaginatedMoviesByCategory(categoryId);
+  infiniteScroll = getPaginatedMoviesBySearch(categoryId);
 }
 
 function movieDetailsPage() {
@@ -123,6 +124,7 @@ function searchPage() {
   // ['#search', 'platzi']
   const [_, query] = location.hash.split('=');
   getMoviesBySearch(query);
+  infiniteScroll = getPaginatedMoviesBySearch(query);
 }
 
 function trendsPage() {
