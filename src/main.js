@@ -77,6 +77,7 @@ function createMovies(movies, container, {lazyLoad = false, clean = true,} = {})
 
         const movieBtn = document.createElement("button");
         movieBtn.classList.add("movie-btn");
+        likedMoviesList()[movie.id] && movieBtn.classList.add('movie-btn--liked')
         movieBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             movieBtn.classList.toggle('movie-btn--liked');
@@ -250,3 +251,15 @@ async function getRelatedMoviesId(id) {
 
     createMovies(relatedMovies, relatedMoviesContainer);
 }
+
+function getLikedMovies() {
+    const likedMovies = likedMoviesList();
+    const moviesArray = Object.values(likedMovies);
+
+    createMovies(moviesArray, likedMoviesContainer, {lazyLoad: true, clean: true});
+
+    console.log(likedMovies);
+}
+
+// RETO. AGREGAR UN EVENT LISTENER DEL LOCAL STORAGE PARA NO TENER QUE RECARGAR LA PAGINA CADA VEZ QUE AGREGAMOS O QUITAMOS UNA PELICULA DE LIKEDMOVIES
+// USAR localStorage.LENGHT?  NO. SE USA EL EVENTO 'storage', asi como si fuera el de click

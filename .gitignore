@@ -105,3 +105,6 @@ dist
 
 # Secrets
 /src/secrets.js
+
+# Personal files
+/Mi_Proyecto_estancado
