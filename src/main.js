@@ -36,6 +36,10 @@ function likeMovie(movie) {
 
     // console.log(likedMovies);
     localStorage.setItem('liked_movies', JSON.stringify(likedMovies));
+
+    // Llamamos las funciones para que se muestren los cambios en likedmovies sin tener que recargar la pagina
+    getTrendingMoviesPreview();
+    getLikedMovies();
 }
 
 // Utils
@@ -258,7 +262,7 @@ function getLikedMovies() {
 
     createMovies(moviesArray, likedMoviesContainer, {lazyLoad: true, clean: true});
 
-    console.log(likedMovies);
+    // console.log(likedMovies);
 }
 
 // RETO. AGREGAR UN EVENT LISTENER DEL LOCAL STORAGE PARA NO TENER QUE RECARGAR LA PAGINA CADA VEZ QUE AGREGAMOS O QUITAMOS UNA PELICULA DE LIKEDMOVIES
